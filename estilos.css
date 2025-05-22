@@ -1,0 +1,43 @@
+@import url("https://fonts.googleapis.com/css?family=Lato");
+html,
+body
+{
+    height: 100%;
+    margin: 0;
+    font-family: Lato, sans-serif;
+}
+
+.header
+{
+    background: #0c60b4 !important;
+}
+
+.formBody
+{
+    max-width: 200px;
+    border: 10px #0c60b4;
+}
+#miTablaPersonalizada th{
+width: 130px;
+overflow: auto;
+}
+
+.table
+{
+    font-size: 08px;
+}
+
+.colores
+{
+    background-color: red !important;
+}
+ul 
+{
+    list-style-type: none;
+}
+li
+{
+    border-top: 1PX #da580d solid;
+    width: 99%;
+    cursor: pointer;
+}

@@ -1,0 +1,190 @@
+<?php
+
+session_start();
+require_once "Conexion.php";
+require 'vendor/autoload.php';
+//include('login.php');
+
+if (!isset($_SESSION['usuario'])) {
+    echo "Usuario no autenticado.";
+    exit;
+}
+
+$usuario = $_SESSION['usuario'];
+$con = CConexion::ConexionDB();
+//var_dump($_GET);
+//var_dump($_POST);
+
+$mes=isset($_GET['mes'])?$_GET['mes']:'';
+var_dump($mes);
+// Usar las clases necesarias de PhpSpreadsheet
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
+
+// Configuración de la base de datos
+
+try {
+    // Conectar a la base de datos
+    //$pdo = new PDO("mysql:host=$host;dbname=$db;charset=utf8", $user, $pass);
+    //$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+    // Realizar una consulta SQL
+    $sql = "SELECT 
+    a.ro, a.servicio, a.ttransporte, a.naviera, a.proveedor, a.consignatario,
+    a.mbl,
+    (SELECT STRING_AGG(ncontenedor, ', ') 
+     FROM embarqueventas_det b 
+     WHERE b.idnro=a.nro) AS ncontenedor,
+    (SELECT STRING_AGG(tcontenedor, ', ') 
+     FROM embarqueventas_det b 
+     WHERE b.idnro=a.nro) AS tcontenedor,
+    a.tccontenedor,
+    (SELECT STRING_AGG(mercancia, ', ') 
+     FROM embarqueventas_det b 
+     WHERE b.idnro=a.nro) AS mercancia,
+    a.porigen, a.fsalida, a.pllegada, a.fllegada, 
+    a.ventat, a.comprat, a.totalp, a.tcontable, 
+    a.obs, a.nro
+    FROM embarqueventas a
+    WHERE a.vendedor = '$usuario'
+    AND CAST(CONCAT(CAST(EXTRACT(year FROM fllegada) AS INT), '', LPAD(CAST(EXTRACT(MONTH FROM fllegada) AS INT)::text, 2, '0')) AS INT)='$mes'
+    ORDER BY 14 ASC+";
+    $stmt = $con->query($sql);
+
+    // Crear una nueva hoja de cálculo
+    $spreadsheet = new Spreadsheet();
+    $sheet = $spreadsheet->getActiveSheet();
+
+    // declare styles
+    $styleHead = [
+        'font' => [ 'bold' => true ],
+        'fill' => [ 'fillType' => Fill::FILL_SOLID, 'startColor' => ['argb' => 'FF0000'] ],
+    ];
+
+    $styleBold = [
+        'font' => [ 'bold' => true ]
+    ];
+
+    $styleTotal = [
+        'font' => [ 'bold' => true ],
+        'fill' => [ 'fillType' => Fill::FILL_SOLID, 'startColor' => ['argb' => 'FFEEFE00'] ],
+    ];
+
+    // Escribir los encabezados de las columnas
+    $columns = ['ro', 'shipper', 'mbl', 'proveedor', 'consignatario', 'ncontenedor', 'tcontenedor', 'ccontenedor', 'mercancia', 'porigen', 
+    'pllegada', 'fsalida', 'fllegada', 'invoice', 'venta', 'comprat', 'ventas', 'compras', 'ventat', 'totalp', 
+    'tcontable', 'tipot', 'naviera', 'obs', 'nro']; // Ajusta según tus columnas
+
+    $columnIndex = 'A'; // Empieza en la columna 1 (A)
+    foreach ($columns as $column) {
+        //var_dump($column);
+        $sheet->setCellValue($columnIndex. '1', $column);
+        $columnIndex++;
+    }
+    // set header styles
+    $sheet->getStyle('A1:Y1')->applyFromArray($styleHead);
+    $sheet->getColumnDimension('B')->setAutoSize(true);
+    $sheet->getColumnDimension('C')->setAutoSize(true);
+    $sheet->getColumnDimension('D')->setAutoSize(true);
+    $sheet->getColumnDimension('E')->setAutoSize(true);
+    $sheet->getColumnDimension('F')->setAutoSize(true);
+    $sheet->getColumnDimension('G')->setAutoSize(true);
+    $sheet->getColumnDimension('H')->setAutoSize(true);
+    $sheet->getColumnDimension('I')->setAutoSize(true);
+    $sheet->getColumnDimension('J')->setAutoSize(true);
+    $sheet->getColumnDimension('K')->setAutoSize(true);
+    $sheet->getColumnDimension('L')->setAutoSize(true);
+    $sheet->getColumnDimension('M')->setAutoSize(true);
+    $sheet->getColumnDimension('N')->setAutoSize(true);
+    $sheet->getColumnDimension('O')->setAutoSize(true);
+    $sheet->getColumnDimension('P')->setAutoSize(true);
+    $sheet->getColumnDimension('Q')->setAutoSize(true);
+    $sheet->getColumnDimension('R')->setAutoSize(true);
+    $sheet->getColumnDimension('S')->setAutoSize(true);
+    $sheet->getColumnDimension('T')->setAutoSize(true);
+    $sheet->getColumnDimension('U')->setAutoSize(true);
+    $sheet->getColumnDimension('V')->setAutoSize(true);
+    $sheet->getColumnDimension('W')->setAutoSize(true);
+    $sheet->getColumnDimension('X')->setAutoSize(true);
+    $sheet->getColumnDimension('Y')->setAutoSize(true);
+    
+
+    // Escribir los datos de la consulta
+    $rowIndex = 2;
+    $nrorow = 0;
+    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        /*$sheet->setCellValue('A'. $rowIndex, $row['ro']);
+        $sheet->setCellValue('B'. $rowIndex, $row['mbl']);
+        $sheet->setCellValue('C'. $rowIndex, $row['proveedor']);*/
+        $sheet->setCellValue('A'. $rowIndex, $row['ro']);
+        $sheet->setCellValue('B'. $rowIndex, $row['shipper']);
+        $sheet->setCellValue('C'. $rowIndex, $row['mbl']);
+        $sheet->setCellValue('D'. $rowIndex, $row['proveedor']);
+        $sheet->setCellValue('E'. $rowIndex, $row['consignatario']);
+        $sheet->setCellValue('F'. $rowIndex, $row['ncontenedor']);
+        $sheet->setCellValue('G'. $rowIndex, $row['tcontenedor']);
+        $sheet->setCellValue('H'. $rowIndex, $row['ccontenedor']);
+        $sheet->setCellValue('I'. $rowIndex, $row['mercancia']);
+        $sheet->setCellValue('J'. $rowIndex, $row['porigen']);
+        $sheet->setCellValue('K'. $rowIndex, $row['pllegada']);
+        $sheet->setCellValue('L'. $rowIndex, $row['fsalida']);
+        $sheet->setCellValue('M'. $rowIndex, $row['fllegada']);
+        $sheet->setCellValue('N'. $rowIndex, $row['invoice']);
+        $sheet->setCellValue('O'. $rowIndex, $row['venta']);
+        $sheet->setCellValue('P'. $rowIndex, $row['comprat']);
+        $sheet->setCellValue('Q'. $rowIndex, $row['ventas']);
+        $sheet->setCellValue('R'. $rowIndex, $row['compras']);
+        $sheet->setCellValue('S'. $rowIndex, $row['ventat']);
+        $sheet->setCellValue('T'. $rowIndex, $row['totalp']);
+        $sheet->setCellValue('U'. $rowIndex, $row['tcontable']);
+        $sheet->setCellValue('V'. $rowIndex, $row['tipot']);
+        $sheet->setCellValue('W'. $rowIndex, $row['naviera']);
+        $sheet->setCellValue('X'. $rowIndex, $row['obs']);
+        $sheet->setCellValue('Y'. $rowIndex, $row['nro']);
+        $nrorow= $nrorow+1;
+        $rowIndex++;
+    }
+
+
+    // set resume
+    $totalRows = $nrorow;
+
+    $rowSub = $totalRows + 3;
+    $rowIGV = $totalRows + 4;
+    $rowTot = $totalRows + 5;
+
+    //$sheet->setCellValue('D'.$rowSub,'Subtotal:');
+    $sheet->getStyle('A'.$rowSub.':Y'.$rowSub)->applyFromArray($styleHead);
+    $sheet->setCellValue('H'.$rowSub,"=COUNT(H2:H".($totalRows+1).")");   // calculate subtotal
+    $sheet->setCellValue('O'.$rowSub,"=SUM(O2:O".($totalRows+1).")");   // calculate subtotal
+    $sheet->setCellValue('P'.$rowSub,"=SUM(P2:P".($totalRows+1).")");   // calculate subtotal
+    $sheet->setCellValue('Q'.$rowSub,"=SUM(Q2:Q".($totalRows+1).")");   // calculate subtotal
+    $sheet->setCellValue('R'.$rowSub,"=SUM(R2:R".($totalRows+1).")");   // calculate subtotal
+    $sheet->setCellValue('S'.$rowSub,"=SUM(S2:S".($totalRows+1).")");   // calculate subtotal
+    $sheet->setCellValue('T'.$rowSub,"=SUM(T2:T".($totalRows+1).")");   // calculate subtotal
+    $sheet->setCellValue('U'.$rowSub,"=SUM(U2:U".($totalRows+1).")");   // calculate subtotal
+
+    //$sheet->setCellValue('D'.$rowIGV,'IGV:');
+    /*$sheet->setCellValue('E'.$rowIGV,"=E".$rowSub."*0.18");             // calculate tax
+
+    $sheet->setCellValue('D'.$rowTot,'Total:');
+    $sheet->setCellValue('E'.$rowTot,"=E".$rowSub."*1.18");             // calculate total
+
+    $sheet->getStyle('D'.$rowSub.':D'.$rowIGV)->applyFromArray($styleBold);
+    $sheet->getStyle('D'.$rowTot.':E'.$rowTot)->applyFromArray($styleTotal);*/
+
+
+
+
+
+    // Guardar el archivo en formato Excel
+    $writer = new Xlsx($spreadsheet);
+    $writer->save('D:\Ventas\reporte.xls');
+    
+
+    //echo "¡Reporte generado con éxito! RUTA -> C:\Users\Ventas\\reporte.xlsx ";
+} catch (Exception $e) {
+    echo "Error: " . $e->getMessage();
+}
+?>
