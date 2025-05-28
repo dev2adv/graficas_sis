@@ -1,23 +1,17 @@
 <?php
-header("Access-Control-Allow-Origin: *");
-header("Access-Control-Allow-Methods: GET, POST");
-header("Access-Control-Allow-Headers: Content-Type");
 
 require_once "Conexion.php";
 $usuario = $_GET['usuario'];
-$mes = $_GET['mes']; // Default to '202501' if not provided
-if (!isset($_GET['usuario'])) {
-    die("Error: No se recibió el usuario.");
-}
+
 try {
     $conn = CConexion::ConexionDB();
-    $stmt = $conn->prepare("SELECT distinct TO_CHAR(a.fllegada, 'YYYYMM') as periodo,a.ttransporte as tipo, 
-                            count(*) as cantidad
+    $stmt = $conn->prepare(" 
+    SELECT distinct TO_CHAR(a.fllegada, 'YYYYMM') as periodo,a.ttransporte as tipo, count(*) cantidad
                                  FROM 
                                  embarqueventas a, usuarios b, trabajador c
                                  WHERE 
-                                 a.vendedor=b.us_email and b.per_id=c.id
-                                 and TO_CHAR(a.fllegada, 'YYYYMM') = '$mes' 
+                                 TO_CHAR(a.fllegada, 'YYYYMM') > '202412'
+                                 and a.vendedor=b.us_email and b.per_id=c.id
                                  and a.id_suc=(select sucursal from usuarios a, trabajador b
                                  where a.per_id=b.id and a.us_email='$usuario')
                                  GROUP BY 

@@ -1,8 +1,13 @@
+* {
+	margin: 0;
+	padding: 0;
+}
+
+
 body {
-    font-family: Arial, sans-serif;
-    margin: 20px;
-    padding: 20px;
-    background-color: #f4f4f4;
+    height: 100%;
+    margin: 0;
+    font-family: Lato, sans-serif;
 }
 
 h1 {
@@ -30,8 +35,73 @@ input[type="text"], textarea {
 }
 
 canvas {
-    width: 600px;
-    height: 30s0px;
+    width: 800px;
+    height: 400px;
+}
+
+/* Contenedores de los gráficos */
+.card {
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+    background-color: white !important; /* Rojo intenso en toda la tarjeta */
+    border: 2px solid #dc3545; /* Mismo tono rojo en el borde */
+    margin-bottom: 20px;
+    color: white; /* Asegurar que el texto contraste */
+}
+
+/* Unificar el estilo de todas las cabeceras en rojo */
+.card-header {
+    font-size: 18px;
+    font-weight: bold;
+    text-align: center;
+    padding: 10px;
+    background-color: #dc3545; /* Rojo */
+    color: white !important;
+    border-bottom: 2px solid #dc3545; /* Un rojo más oscuro */
+}
+
+/* Cuerpo donde está el gráfico */
+.card-body {
+    text-align: center;
+    padding: 20px;
+}
+
+/* Ajuste del tamaño de los gráficos */
+body #ventasChart, body #cobrosChart {
+    width: 800px;
+    height: 300px;
+    display: block;
+    margin: auto;
+}
+
+.grid-layout {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* Dos columnas arriba */
+    grid-template-rows: auto auto; /* Dos filas */
+    gap: 20px; /* Espaciado entre gráficos */
+}
+
+.full-width {
+    grid-column: span 2; /* La tercera gráfica ocupa todo el ancho */
+}
+
+.card-body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 300px;
+    max-height: 300px;
+}
+
+canvas {
+    width: 100%;
+    height: 100%;
+}
+
+#mesSeleccionado {
+    width: 300px; /* Fijar un ancho específico */
+    max-width: 400px; /* Evitar que se expanda demasiado */
 }
 
 input[type="submit"] {

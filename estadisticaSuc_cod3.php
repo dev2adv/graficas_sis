@@ -9,21 +9,22 @@ $mes = $_GET['mes']; // Default to '202501' if not provided
 if (!isset($_GET['usuario'])) {
     die("Error: No se recibió el usuario.");
 }
+if (!isset($_GET['mes'])) {
+    die("Error: No se recibió el mes.");
+}
 try {
     $conn = CConexion::ConexionDB();
-    $stmt = $conn->prepare("SELECT distinct TO_CHAR(a.fllegada, 'YYYYMM') as periodo,a.ttransporte as tipo, 
-                            count(*) as cantidad
-                                 FROM 
-                                 embarqueventas a, usuarios b, trabajador c
-                                 WHERE 
-                                 a.vendedor=b.us_email and b.per_id=c.id
-                                 and TO_CHAR(a.fllegada, 'YYYYMM') = '$mes' 
-                                 and a.id_suc=(select sucursal from usuarios a, trabajador b
-                                 where a.per_id=b.id and a.us_email='$usuario')
-                                 GROUP BY 
-                                 TO_CHAR(a.fllegada, 'YYYYMM'),a.ttransporte
-                                  ORDER BY  1 asc
-    ");
+    $stmt = $conn->prepare("SELECT to_char(a.fllegada,'yyyymm') as periodo,c.trabajador as tipo,count(*) as cantidad
+                            from embarqueventas a,usuarios b,trabajador c
+                            where a.vendedor=b.us_email and b.per_id=c.id
+                            and TO_CHAR(a.fllegada, 'YYYYMM') = '$mes'
+                            and a.id_suc=(select n.sucursal from usuarios m,trabajador n
+                            where m.per_id=n.id 
+                            and m.us_email='$usuario')
+                            group by 
+                            to_char(a.fllegada,'yyyymm'),c.trabajador
+                            order by 
+                            1,2 ASC");
     $stmt->execute();
     $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
 

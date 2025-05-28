@@ -11,6 +11,8 @@ if (!isset($_SESSION['usuario'])) {
 }
 //echo $_SESSION['usuario'];
 $usuario = $_SESSION['usuario'];
+//pasamos un nuevo parametro para los querys
+//$mes = '202502';
 
 $sqls=" select c.sucursal from usuarios a, trabajador b, cat_sucursal c
         where a.per_id=b.id and a.us_email='$usuario' and b.sucursal=c.id";
@@ -18,7 +20,15 @@ $consulta=$con->query($sqls);
 $consulta->execute();
 $agencia=$consulta->fetch(PDO::FETCH_ASSOC);
 
-
+$sqlMeses="	select distinct to_char(a.fllegada,'yyyymm') as mes
+	from embarqueventas a, usuarios b, trabajador c
+	where a.vendedor=b.us_email and b.per_id=c.id
+    and a.id_suc=(select sucursal from usuarios a, trabajador b
+    where a.per_id=b.id and a.us_email='$usuario')
+	order by 1";
+$consultaMeses=$con->query($sqlMeses);
+$consultaMeses->execute();
+$mesesDisponibles = $consultaMeses->fetchAll(PDO::FETCH_ASSOC);
 
 $usuarios = array("IVAlan", "QLuis","IVKriss","MMLaura");
 /*if (in_array($usuario, $usuarios)) {
@@ -37,67 +47,79 @@ $usuarios = array("IVAlan", "QLuis","IVKriss","MMLaura");
  }*/
 
 ?>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<head>
+<head>    
     <link rel="stylesheet" href="estiloc.css">
 </head>
 
 <body>
-    <div class="card border-danger">
-        <div class="card-header border-danger bg-danger text-white">Estadísticas de Ventas <?php echo $agencia['sucursal']; ?> </div>
-        <div class="card-body " style="justify-content: center;">
-            <canvas id="ventasChart" ></canvas>
+    <!--la lista desplegable-->
+    <!--<h3>Seleccione un periodo:</h3>-->
+    <label for="mesSeleccionado">Seleccione un periodo de ventas:</label>
+    <select id="mesSeleccionado" class="form-select">
+        <option value=""> </option>
+        <?php foreach ($mesesDisponibles as $mes) { ?>
+            <option value="<?php echo $mes['mes']; ?>"><?php echo $mes['mes']; ?></option>
+        <?php } ?>
+    </select>
+    
+ <div id="graficosContainer" style="display: none;">
+    <div class="grid-layout">
+        <div class="card border-danger">
+            <div class="card-header border-danger bg-danger text-white">
+                Estadísticas por Vendedor <?php echo $agencia['sucursal']; ?>
+            </div>
+            <div class="card-body">
+                <canvas id="pagosChart"></canvas>
+            </div>
         </div>
+
+        <div class="card border-danger">
+            <div class="card-header border-danger bg-danger text-white">
+                Estadísticas por tipo de transporte <?php echo $agencia['sucursal']; ?>
+            </div>
+            <div class="card-body">
+                <canvas id="cobrosChart"></canvas>
+            </div>
+        </div>
+
+        <div class="card border-danger full-width">
+            <div class="card-header border-danger bg-danger text-white">
+                Estadísticas de ventas Sucursal <?php echo $agencia['sucursal']; ?>
+            </div>
+            <div class="card-body">
+                <canvas id="ventasChart"></canvas>
+            </div>
         </div>
     </div>
+</div>
+
+             
     <!--modifica tamaño del canvas-->
     <!--<canvas id="ventasChart" style="width: 500px; height: 300px;"></canvas>-->
+    
+    
+    
     <script>
-        console.log("inicio de la grafica");
-        fetch('estadisticaSuc_cod.php?usuario=<?php echo $usuario; ?>')
-            .then(response => response.json())
-            .then(data => {
-                const labels = data.map(row => row.periodo);
-                console.log(labels);
-                const suc = data.map(row => row.casos);
-                console.log(suc);
-                const cantidades = data.map(row => row.casos);
-                console.log(cantidades);
-                const ctx = document.getElementById('ventasChart').getContext('2d');
-                console.log(ctx);
-                
-                new Chart(ctx, {
-                    type: 'bar',
-                    data: {
-                        labels: labels,
-                        datasets: [{
-                            label: 'Ventas de la sucursal',
-                            data: cantidades,
-                            borderColor: 'rgb(2, 63, 63)',
-                            backgroundColor: 'rgba(146, 16, 31, 0.6)',
-                            borderWidth: 2,
-                            barThickness: 80, // Ajusta el grosor de las barras en píxeles
-                            barPercentage: 0.8, // Ajusta el porcentaje de ancho de cada barra
-                            categoryPercentage: 0.5 // Ajusta el espacio entre categorías
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        scales: {
-                            y: {
-                                min: 0,  // Establece el valor mínimo del eje Y
-                                max: 100, // Establece el valor máximo del eje Y
-                                ticks: {
-                                    stepSize: 10, // Define el intervalo entre valores
-                                //beginAtZero: true
-                                
-                                }
-                            }
-                        }
-                    }
-                });
-            });
+        
+        const usuario = "<?php echo $_SESSION['usuario']; ?>"; // Mantener usuario desde PHP
+           
+        document.getElementById("mesSeleccionado").addEventListener("change", function() {
+        const mes = this.value; // Capturar el valor del mes seleccionado
+            console.log("Usuario:", usuario);
+            console.log("Mes seleccionado:", mes);
+            // Enviar `usuario` y `mes` a `scripts.js`
+            procesarDatos(usuario, mes);
+        });
     </script>
+<span id="usuario" style="display: none;"><?php echo $_SESSION['usuario']; ?></span>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="scripts.js"></script> <!-- Mueve la lógica de gráficos a un archivo separado -->
+        <script>
+            // Cuando la página se cargue, desplazar automáticamente al inicio
+            window.onload = function() {
+            window.scrollTo(0, 0);
+            };
+        </script>             
 </body>
 </html>

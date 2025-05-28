@@ -15,7 +15,8 @@ body
 .formBody
 {
     max-width: 200px;
-    border: 10px #0c60b4;
+    border: 10px red;
+
 }
 #miTablaPersonalizada th{
 width: 130px;
@@ -35,9 +36,13 @@ ul
 {
     list-style-type: none;
 }
+
+
+
+
 li
 {
-    border-top: 1PX #da580d solid;
+    border-top: 1PX #dc3545s solid;
     width: 99%;
     cursor: pointer;
 }
