@@ -92,7 +92,7 @@ function actualizarGraficas([datos1, datos2, datos3]) {
 let charts = {}; // Almacenar las instancias de los gráficos
 
 function procesarDatos(usuario, mes) {
-    const urlBase = "http://192.168.0.117/"; // Cambia esto a la URL base correcta
+    const urlBase = "http://127.0.0.1/sis/"; // Cambia esto a la URL base correcta
 
     const endpoints = [
         `${urlBase}estadisticaSuc_cod2.php?usuario=${usuario}&mes=${mes}`,
