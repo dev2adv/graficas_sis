@@ -16,7 +16,7 @@ try {
                                  embarqueventas a, usuarios b, trabajador c
                                  WHERE 
                                  a.vendedor=b.us_email and b.per_id=c.id
-                                 --and TO_CHAR(a.fllegada, 'YYYYMM') = '$mes'
+                                 and TO_CHAR(a.fllegada, 'YYYYMM') = '$mes'
                                  and a.id_suc=(select sucursal from usuarios a, trabajador b
                                  where a.per_id=b.id and a.us_email='$usuario')
                                  GROUP BY 
